@@ -2,6 +2,7 @@ package com.wahyaumau.batchinsert.services;
 
 import com.wahyaumau.batchinsert.entities.Product;
 import com.wahyaumau.batchinsert.repositories.ProductRepository;
+import com.wahyaumau.batchinsert.utils.ListUtil;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -44,7 +47,6 @@ public class ProductService {
     }
 
     public void saveAllJdbcBatch(List<Product> productData){
-        System.out.println("insert using jdbc batch");
         String sql = String.format("INSERT INTO %s (title, stock, price, import_history_id) VALUES (?, ?, ?, ?)", Product.class.getAnnotation(Table.class).name());
         try (Connection connection = hikariDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -64,6 +66,29 @@ public class ProductService {
                 counter++;
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveAllJdbcBatchCallable(List<Product> productData){
+        System.out.println("insert using jdbc batch, threading");
+        System.out.print("cp size " + hikariDataSource.getMaximumPoolSize());
+        System.out.println(" batch size " + batchSize);
+        List<List<Product>> listOfBookSub = ListUtil.createSubList(productData, batchSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(hikariDataSource.getMaximumPoolSize());
+        List<Callable<Integer>> callables = listOfBookSub.stream().map(sublist ->
+             (Callable<Integer>) () -> {
+//                System.out.println("Inserting " + sublist.size() + " using callable from thread" + Thread.currentThread().getName());
+                saveAllJdbcBatch(sublist);
+                return sublist.size();
+        }).collect(Collectors.toList());
+        try {
+            List<Future<Integer>> futures = executorService.invokeAll(callables);
+            int count = 0;
+            for(Future<Integer> future: futures){
+                count += future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }

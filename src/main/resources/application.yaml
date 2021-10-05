@@ -3,6 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/product_db?currentSchema=product_schema
     username: postgres
     password: postgres
+    hikari:
+      connectionTimeout: 300_000 #5 minutes
+      maximumPoolSize: 10
   jpa:
     properties:
       hibernate:

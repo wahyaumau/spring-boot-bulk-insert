@@ -39,7 +39,7 @@ public class ProductController {
                 .build();
 
         System.out.print("Using id identity, ");
-        productService.saveAllJdbcBatch(productData);
+        productService.saveAllJdbcBatchCallable(productData);
         LocalDateTime endInsert = LocalDateTime.now();
         importHistory.setEndInsert(endInsert);
         productImportHistoryRepository.save(importHistory);
