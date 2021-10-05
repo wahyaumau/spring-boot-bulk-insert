@@ -39,7 +39,7 @@ public class ProductController {
                 .build();
 
         System.out.print("Using id sequence, ");
-        productService.saveAll(productData);
+        productService.saveAllHibernateBatch(productData);
         LocalDateTime endInsert = LocalDateTime.now();
         importHistory.setEndInsert(endInsert);
         productImportHistoryRepository.save(importHistory);
