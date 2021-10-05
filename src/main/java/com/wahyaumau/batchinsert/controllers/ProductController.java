@@ -38,7 +38,7 @@ public class ProductController {
                 .setImportHistory(importHistory)
                 .build();
 
-        System.out.print("Using id identity, ");
+        System.out.print("Using id sequence, ");
         productService.saveAll(productData);
         LocalDateTime endInsert = LocalDateTime.now();
         importHistory.setEndInsert(endInsert);
