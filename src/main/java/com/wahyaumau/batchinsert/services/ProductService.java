@@ -14,7 +14,7 @@ public class ProductService {
     ProductRepository productRepository;
 
     public void saveAll(List<Product> productData){
-        System.out.println("insert using saveAll");
+        System.out.println("insert using saveAll, hibernate batch");
         productRepository.saveAll(productData);
     }
 }

@@ -6,5 +6,7 @@ spring:
   jpa:
     properties:
       hibernate:
+        jdbc.batch_size: 30
+        order_inserts: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate.ddl-auto: update
